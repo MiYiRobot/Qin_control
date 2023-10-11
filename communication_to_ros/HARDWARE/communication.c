@@ -1,18 +1,18 @@
 #include "main.h"
 
 /************************************
-   ´Ë´úÂëÓÃÀ´ÊµÏÖSTM32ÓërosµÄÉÏÏÂÎ»»úÍ¨Ñ¶
+   æ­¤ä»£ç ç”¨æ¥å®ç°STM32ä¸rosçš„ä¸Šä¸‹ä½æœºé€šè®¯
 ************************************/
 
-RELATIVE_POSITION BALL_TO_CAR;   //Çòµ½³µµÄÏà¶ÔÎ»ÖÃ
-unsigned char receiveFlag;       //½ÓÊÕÊı¾İµÄ±êÖ¾Î»
+RELATIVE_POSITION BALL_TO_CAR;   //çƒåˆ°è½¦çš„ç›¸å¯¹ä½ç½®
+unsigned char receiveFlag;       //æ¥æ”¶æ•°æ®çš„æ ‡å¿—ä½
 
-//Í¨ĞÅĞ­Òé³£Á¿
+//é€šä¿¡åè®®å¸¸é‡
 const uint8_t header[2] = {0x55,0xaa};
 const uint8_t ender[2] = {0x0d,0x0a};
 
-//-----------------------¹²ÓÃÌå·¢ËÍºÍ½ÓÊÕÊı¾İ----------------------------------
-//·¢ËÍÊı¾İ £¨×ª×Ó½Ç¶È£¬×ªËÙ£¬µçÁ÷£©
+//-----------------------å…±ç”¨ä½“å‘é€å’Œæ¥æ”¶æ•°æ®----------------------------------
+//å‘é€æ•°æ® ï¼ˆè½¬å­è§’åº¦ï¼Œè½¬é€Ÿï¼Œç”µæµï¼‰
 union SendDataRPM
 { 
     short d; 
@@ -24,7 +24,7 @@ union SendDataAngle
    float d;
    unsigned char data[4];
 }Angle;
-//½ÓÊÕÊı¾İ £¨Ä¿±ê¾àÀë£¬Ä¿±ê½Ç¶È£©
+//æ¥æ”¶æ•°æ® ï¼ˆç›®æ ‡è·ç¦»ï¼Œç›®æ ‡è§’åº¦ï¼‰
 union ReceiveData1
 {
    float d;
@@ -36,36 +36,36 @@ union ReceiveData2
    float d;
    unsigned char data[4];
 }Target_Angle;
-//½ÓÊÕÊı¾İ»º´æÇø
+//æ¥æ”¶æ•°æ®ç¼“å­˜åŒº
 unsigned char  receiveBuff[15] = {0};
-unsigned char USART_Receiver   = 0;          //½ÓÊÕÊı¾İ
-/*--------------------------------½ÓÊÕĞ­Òé-----------------------------------
+unsigned char USART_Receiver   = 0;          //æ¥æ”¶æ•°æ®
+/*--------------------------------æ¥æ”¶åè®®-----------------------------------
 //----------------55 aa size 00 00 00 00 00 crc8 0d 0a----------------------
-//Êı¾İÍ·55aa + Êı¾İ×Ö½ÚÊısize + Êı¾İ£¨ÀûÓÃ¹²ÓÃÌå£© + Ğ£Ñécrc8 + Êı¾İÎ²0d0a
-//×¢Òâ£ºÕâÀïÊı¾İÖĞÔ¤ÁôÁËÒ»¸ö×Ö½ÚµÄ¿ØÖÆÎ»£¬ÆäËûµÄ¿ÉÒÔ×ÔĞĞÀ©Õ¹£¬¸ü¸ÄsizeºÍÊı¾İ
+//æ•°æ®å¤´55aa + æ•°æ®å­—èŠ‚æ•°size + æ•°æ®ï¼ˆåˆ©ç”¨å…±ç”¨ä½“ï¼‰ + æ ¡éªŒcrc8 + æ•°æ®å°¾0d0a
+//æ³¨æ„ï¼šè¿™é‡Œæ•°æ®ä¸­é¢„ç•™äº†ä¸€ä¸ªå­—èŠ‚çš„æ§åˆ¶ä½ï¼Œå…¶ä»–çš„å¯ä»¥è‡ªè¡Œæ‰©å±•ï¼Œæ›´æ”¹sizeå’Œæ•°æ®
 --------------------------------------------------------------------------*/
 int usartReceiveData(float *data1,float *data2,unsigned char *flag)
 {
-        static unsigned char checkSum          = 0;            //ÓÃÓÚĞ£Ñé
-        static unsigned char USARTBufferIndex  = 0;    //ÓÃÓÚ»º³åÇø³õÊ¼»¯
-        static short j=0,k=0;      //½ÓÊÕÊı¾İ±êÖ¾Î»
-        static unsigned char USARTReceiveFront = 0;     //ÓÃÓÚ½ÓÊÕÊı¾İÍ·
-        static unsigned char Start_Flag        = START;  //Ò»Ö¡Êı¾İ´«ËÍ¿ªÊ¼±êÖ¾Î»
-        static short datalength                = 0;     //Êı¾İ³¤¶È
+        static unsigned char checkSum          = 0;            //ç”¨äºæ ¡éªŒ
+        static unsigned char USARTBufferIndex  = 0;    //ç”¨äºç¼“å†²åŒºåˆå§‹åŒ–
+        static short j=0,k=0;      //æ¥æ”¶æ•°æ®æ ‡å¿—ä½
+        static unsigned char USARTReceiveFront = 0;     //ç”¨äºæ¥æ”¶æ•°æ®å¤´
+        static unsigned char Start_Flag        = START;  //ä¸€å¸§æ•°æ®ä¼ é€å¼€å§‹æ ‡å¿—ä½
+        static short datalength                = 0;     //æ•°æ®é•¿åº¦
     
-        USART_Receiver = USART_ReceiveData(USART1);  //½ÓÊÕÊı¾İ
-      //½ÓÊÕÊı¾İÍ·
+        USART_Receiver = USART_ReceiveData(USART1);  //æ¥æ”¶æ•°æ®
+      //æ¥æ”¶æ•°æ®å¤´
        if(Start_Flag == START)
        {
             if(USART_Receiver == 0xaa)       //buf[1]
             {
                if(USARTReceiveFront == 0x55) //buf[0]
-               {                               //Êı¾İÍ·Á½Î»
-                 Start_Flag = !START;     //ÊÕµ½Êı¾İÍ·£¬¿ªÊ¼½ÓÊÕÊı¾İ
+               {                               //æ•°æ®å¤´ä¸¤ä½
+                 Start_Flag = !START;     //æ”¶åˆ°æ•°æ®å¤´ï¼Œå¼€å§‹æ¥æ”¶æ•°æ®
                  receiveBuff[0] = USARTReceiveFront;   //buf[0]
                  receiveBuff[1] = USART_Receiver;      //buf[1]
-				 USARTBufferIndex = 0;             //»º³åÇø³õÊ¼»¯
-				 checkSum = 0x00;				  //Ğ£ÑéºÍ³õÊ¼»¯                   
+				 USARTBufferIndex = 0;             //ç¼“å†²åŒºåˆå§‹åŒ–
+				 checkSum = 0x00;				  //æ ¡éªŒå’Œåˆå§‹åŒ–                   
                }
             }
             else
@@ -77,55 +77,55 @@ int usartReceiveData(float *data1,float *data2,unsigned char *flag)
          {
             switch(USARTBufferIndex)
             {
-                case 0: //½ÓÊÕÊı¾İ³¤¶È
+                case 0: //æ¥æ”¶æ•°æ®é•¿åº¦
                     receiveBuff[2] = USART_Receiver;   //buf[2]    length = 9 = 4 + 4 + 1
                     datalength =receiveBuff[2];  
                     USARTBufferIndex++;
                     break;
-                case 1:    //½ÓÊÕËùÓĞÊı¾İ£¬²¢¸³Öµ´¦Àí
+                case 1:    //æ¥æ”¶æ‰€æœ‰æ•°æ®ï¼Œå¹¶èµ‹å€¼å¤„ç†
                       receiveBuff[j+3] = USART_Receiver;     //buf[3].....buf[11]
                       j++;
                       if(j>= datalength)    
                       {
                          j = 0;
-                         USARTBufferIndex++;    //½ÓÊÕµ½ËùÓĞÊı¾İ
+                         USARTBufferIndex++;    //æ¥æ”¶åˆ°æ‰€æœ‰æ•°æ®
                       }
                       break;
-                case 2:  //½ÓÊÕĞ£ÑéÎ»
+                case 2:  //æ¥æ”¶æ ¡éªŒä½
                       receiveBuff[3+datalength-1]=USART_Receiver;       //buf[12]
                       checkSum = getCrc8(receiveBuff,3+datalength);
-                      //¼ì²éĞÅÏ¢Ğ£ÑéÎ»
+                      //æ£€æŸ¥ä¿¡æ¯æ ¡éªŒä½
                       if(checkSum != receiveBuff[3+datalength-1])
                       {
                         return 0;
                       }
                       USARTBufferIndex++;
                       break;
-                case 3:   //½ÓÊÕĞÅÏ¢Î²
+                case 3:   //æ¥æ”¶ä¿¡æ¯å°¾
 				   if(k==0)
 				   {
-				    	//Êı¾İ0d     buf[11]  ÎŞĞèÅĞ¶Ï
+				    	//æ•°æ®0d     buf[13]  æ— éœ€åˆ¤æ–­
 				    	k++;
 				   }
 				   else if (k==1)
 				   {
-					//Êı¾İ0a     buf[12] ÎŞĞèÅĞ¶Ï   
+					//æ•°æ®0a     buf[14] æ— éœ€åˆ¤æ–­   
                     
-                    //½øĞĞ¾àÀë½Ç¶È¸³Öµ   
+                    //è¿›è¡Œè·ç¦»è§’åº¦èµ‹å€¼   
                      for(k = 0;k<4;k++)
                      { 
                         Distance.data[k] = receiveBuff[3+k];      //buf[3] buf[4] buf[5] buf[6] --->Distance.data[0]...[3]
                         Target_Angle.data[k] = receiveBuff[7+k];  //buf[7]..buf[10]  ---> Target_Angle.data[0]...[3]
                      }
   
-                    //¸³Öµ²Ù×÷
-                     *data1 = Distance.d;   //¾àÀë
-                     *data2 = Target_Angle.d;  //½Ç¶È
-                     //±êÖ¾Î»Ö±½Ó¸³Öµ
+                    //èµ‹å€¼æ“ä½œ
+                     *data1 = Distance.d;   //è·ç¦»
+                     *data2 = Target_Angle.d;  //è§’åº¦
+                     //æ ‡å¿—ä½ç›´æ¥èµ‹å€¼
                      *flag=receiveBuff[11];                       
                         
                      					//-----------------------------------------------------------------
-					//Íê³ÉÒ»¸öÊı¾İ°üµÄ½ÓÊÕ£¬Ïà¹Ø±äÁ¿ÇåÁã£¬µÈ´ıÏÂÒ»×Ö½ÚÊı¾İ
+					//å®Œæˆä¸€ä¸ªæ•°æ®åŒ…çš„æ¥æ”¶ï¼Œç›¸å…³å˜é‡æ¸…é›¶ï¼Œç­‰å¾…ä¸‹ä¸€å­—èŠ‚æ•°æ®
 					USARTBufferIndex   = 0;
 					USARTReceiveFront = 0;
 					Start_Flag         = START;
@@ -144,68 +144,68 @@ int usartReceiveData(float *data1,float *data2,unsigned char *flag)
 
 
 
-/*---------------------·¢ËÍĞ­Òé----------------------------------------
+/*---------------------å‘é€åè®®----------------------------------------
  ------------55 aa size 00 00 00 00 crc8 0d 0a-------------------------   
-//Êı¾İÍ·55aa + Êı¾İ×Ö½ÚÊısize + Êı¾İ(ÀûÓÃ¹²ÓÃÌå) + Ğ£×¼crc8 + Êı¾İÎ²0d0a
-//×¢Òâ£ºÕâÀïÊı¾İÖĞÔ¤ÁôÁËÒ»¸ö×Ö½ÚµÄ¿ØÖÆÎ»£¬ÆäÓàµÄ¿ÉÒÔ×ÔĞĞÀ©Õ¹£¬¸ü¸ÄsizeºÍÊı¾İ
+//æ•°æ®å¤´55aa + æ•°æ®å­—èŠ‚æ•°size + æ•°æ®(åˆ©ç”¨å…±ç”¨ä½“) + æ ¡å‡†crc8 + æ•°æ®å°¾0d0a
+//æ³¨æ„ï¼šè¿™é‡Œæ•°æ®ä¸­é¢„ç•™äº†ä¸€ä¸ªå­—èŠ‚çš„æ§åˆ¶ä½ï¼Œå…¶ä½™çš„å¯ä»¥è‡ªè¡Œæ‰©å±•ï¼Œæ›´æ”¹sizeå’Œæ•°æ®
 ----------------------------------------------------------------------*/
 /**
-  * @brief  ½«×ª×Ó½Ç¶È¡¢×óÓÒÂÖ×ªËÙºÍ¿ØÖÆĞÅºÅ½øĞĞ´ò°ü£¬Í¨¹ı´®¿Ú·¢ËÍ¸øros
-  * @param  ×ª×Ó½Ç¶È¡¢×óÓÒÂÖ×ªËÙºÍ¿ØÖÆĞÅºÅ
-  * @retval ÎŞ
+  * @brief  å°†è½¬å­è§’åº¦ã€å·¦å³è½®è½¬é€Ÿå’Œæ§åˆ¶ä¿¡å·è¿›è¡Œæ‰“åŒ…ï¼Œé€šè¿‡ä¸²å£å‘é€ç»™ros
+  * @param  è½¬å­è§’åº¦ã€å·¦å³è½®è½¬é€Ÿå’Œæ§åˆ¶ä¿¡å·
+  * @retval æ— 
   */
 void usartSendData(short LeftRPM,short RightRPM,float angle,unsigned char ctrlFlag)
 {
-    //Ğ­ÒéÊı¾İ»º´æÊı×é   
+    //åè®®æ•°æ®ç¼“å­˜æ•°ç»„   
     unsigned char buf[15];
     int i,length=0;    
-    //¼ÆËã½Ç¶È¡¢×ªËÙ¡¢µçÁ÷
+    //è®¡ç®—è§’åº¦ã€è½¬é€Ÿã€ç”µæµ
     Angle.d = angle;
     RPM1.d = LeftRPM;
     RPM2.d = RightRPM;
-    //ÉèÖÃÏûÏ¢Í·
+    //è®¾ç½®æ¶ˆæ¯å¤´
     for(i = 0;i<2;i++)
     {
       buf[i] = header[i];        //buf[0] buf[1]
     }
-    //ÉèÖÃ³¤¶È
+    //è®¾ç½®é•¿åº¦
     length = 9;   //2 + 2 + 4 + 1 = 9
     buf[2] = length;            //buf[2]
-    //·¢ËÍÂÖ×Ó×ªËÙ
+    //å‘é€è½®å­è½¬é€Ÿ
     for(i = 0;i < 2; i++)
     {
       buf[3+i] = RPM1.data[i];      //buf[3]  buf[4]
       buf[5+i] = RPM2.data[i];      //buf[5]  buf[6]
     }
-    //·¢ËÍÂÖ×Ó½Ç¶È
+    //å‘é€è½®å­è§’åº¦
     for(i = 0;i<4; i++)
     {
       buf[7+i] = Angle.data[i];    //buf[7] buf[8] buf[9] buf[10]
     }
-    //Ô¤Áô¿ØÖÆÖ¸Áî
+    //é¢„ç•™æ§åˆ¶æŒ‡ä»¤
     buf[3 + length - 1] = ctrlFlag;    //buf[11]
-    //crcĞ£Ñé
+    //crcæ ¡éªŒ
     buf[3 + length] = getCrc8(buf,3+ length);   //buf[12]
-    //ÏûÏ¢Î² 
+    //æ¶ˆæ¯å°¾ 
     for(i = 0;i < 2;i++)
     {
        buf[length+3+1+i] = ender[i];    //buf[13]   buf[14]
     }
-    //·¢ËÍÊı¾İ
+    //å‘é€æ•°æ®
     Usart_Send_String(buf,sizeof(buf));
 }
 
 /**
-  * @brief  ·¢ËÍÖ¸¶¨´óĞ¡µÄ×Ö·ûÊı×é
-  * @param  Êı×éµØÖ·¡¢Êı×é´óĞ¡
-  * @retval ÎŞ
+  * @brief  å‘é€æŒ‡å®šå¤§å°çš„å­—ç¬¦æ•°ç»„
+  * @param  æ•°ç»„åœ°å€ã€æ•°ç»„å¤§å°
+  * @retval æ— 
   */
 void Usart_Send_String(unsigned char *p,short sendSize)
 {
     static int length = 0;
     while(length<sendSize)
     {
-       while(!(USART1->SR&(0x01<<7)) ){};  //·¢ËÍ»º´æÇøÎª¿Õ
+       while(!(USART1->SR&(0x01<<7)) ){};  //å‘é€ç¼“å­˜åŒºä¸ºç©º
         USART1->DR = *p;
        p++;
        length++;
@@ -214,9 +214,9 @@ void Usart_Send_String(unsigned char *p,short sendSize)
 }
 
 /**************************************************************************
-º¯Êı¹¦ÄÜ£º¼ÆËã°ËÎ»Ñ­»·ÈßÓàĞ£Ñé£¬±»usartSendDataºÍusartReceiveOneDataº¯Êıµ÷ÓÃ
-Èë¿Ú²ÎÊı£ºÊı×éµØÖ·¡¢Êı×é´óĞ¡
-·µ»Ø  Öµ£ºÎŞ
+å‡½æ•°åŠŸèƒ½ï¼šè®¡ç®—å…«ä½å¾ªç¯å†—ä½™æ ¡éªŒï¼Œè¢«usartSendDataå’ŒusartReceiveOneDataå‡½æ•°è°ƒç”¨
+å…¥å£å‚æ•°ï¼šæ•°ç»„åœ°å€ã€æ•°ç»„å¤§å°
+è¿”å›  å€¼ï¼šæ— 
 **************************************************************************/
 unsigned char getCrc8(unsigned char *ptr, unsigned short len)
 {
@@ -238,9 +238,9 @@ unsigned char getCrc8(unsigned char *ptr, unsigned short len)
 }
 
 /**
-  * @brief  ½ÓÊÕÊı¾İ³õÊ¼»¯
-  * @param  ÎŞ
-  * @retval ÎŞ
+  * @brief  æ¥æ”¶æ•°æ®åˆå§‹åŒ–
+  * @param  æ— 
+  * @retval æ— 
   */
 void receiveinit(void)
 {
@@ -251,13 +251,13 @@ void receiveinit(void)
 
 /**********************************END***************************************/
 
-//´®¿ÚÖĞ¶Ï·şÎñº¯Êı£¬ÓÃÓÚ½ÓÊÕ32Êı¾İ
+//ä¸²å£ä¸­æ–­æœåŠ¡å‡½æ•°ï¼Œç”¨äºæ¥æ”¶32æ•°æ®
 void USART1_IRQHandler()
 {
 	if(USART_GetITStatus(USART1, USART_IT_RXNE) != RESET)
  	 {
         usartReceiveData(&BALL_TO_CAR.distance,&BALL_TO_CAR.angle,&receiveFlag); 
-		USART_ClearITPendingBit(USART1,USART_IT_RXNE);			 //Çå³ıÖĞ¶Ï±êÖ¾Î»
+		USART_ClearITPendingBit(USART1,USART_IT_RXNE);			 //æ¸…é™¤ä¸­æ–­æ ‡å¿—ä½
 	 }
 }
 
