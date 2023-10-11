@@ -92,10 +92,10 @@ int usartReceiveData(float *data1,float *data2,unsigned char *flag)
                       }
                       break;
                 case 2:  //接收校验位
-                      receiveBuff[3+datalength-1]=USART_Receiver;       //buf[12]
+                      receiveBuff[3+datalength]=USART_Receiver;       //buf[12]
                       checkSum = getCrc8(receiveBuff,3+datalength);
                       //检查信息校验位
-                      if(checkSum != receiveBuff[3+datalength-1])
+                      if(checkSum != receiveBuff[3+datalength])
                       {
                         return 0;
                       }
