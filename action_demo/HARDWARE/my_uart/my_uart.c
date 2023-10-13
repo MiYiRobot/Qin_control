@@ -10,11 +10,11 @@ void uart4_init(u32 bound)
 	RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOC,ENABLE); //使能GPIOC时钟
 	RCC_APB1PeriphClockCmd(RCC_APB1Periph_UART4,ENABLE);//使能USART4时钟
  
-	//串口3对应引脚复用映射
-	GPIO_PinAFConfig(GPIOC,GPIO_PinSource10,GPIO_AF_UART4); //GPIOC10复用为USART3
-	GPIO_PinAFConfig(GPIOC,GPIO_PinSource11,GPIO_AF_UART4); //GPIOC11复用为USART3
+	//串口4对应引脚复用映射
+	GPIO_PinAFConfig(GPIOC,GPIO_PinSource10,GPIO_AF_UART4); //GPIOC10复用为USART4
+	GPIO_PinAFConfig(GPIOC,GPIO_PinSource11,GPIO_AF_UART4); //GPIOC11复用为USART4
 	
-	//USART3端口配置
+	//USART4端口配置
   GPIO_InitStructure.GPIO_Pin = GPIO_Pin_10 | GPIO_Pin_11; //GPIOC10与GPIOC11
 	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF;//复用功能
 	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;	//速度50MHz
@@ -33,8 +33,8 @@ void uart4_init(u32 bound)
 	
     USART_Cmd(UART4, ENABLE);  //使能串口4
 
-	//Usart3 NVIC 配置
-    NVIC_InitStructure.NVIC_IRQChannel = UART4_IRQn;//串口3中断通道
+	//Usart4 NVIC 配置
+    NVIC_InitStructure.NVIC_IRQChannel = UART4_IRQn;//串口4中断通道
 	NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority=1;//抢占优先级2
 	NVIC_InitStructure.NVIC_IRQChannelSubPriority =2;		//子优先级2
 	NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;			//IRQ通道使能
