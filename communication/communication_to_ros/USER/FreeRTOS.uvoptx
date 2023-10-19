@@ -1010,7 +1010,7 @@
       <tvExp>0</tvExp>
       <tvExpOptDlg>0</tvExpOptDlg>
       <bDave2>0</bDave2>
-      <PathWithFileName>.\move_task.c</PathWithFileName>
+      <PathWithFileName>..\TASK\move_task.c</PathWithFileName>
       <FilenameWithoutPath>move_task.c</FilenameWithoutPath>
       <RteFlg>0</RteFlg>
       <bShared>0</bShared>
@@ -1022,7 +1022,7 @@
       <tvExp>0</tvExp>
       <tvExpOptDlg>0</tvExpOptDlg>
       <bDave2>0</bDave2>
-      <PathWithFileName>.\communication_task.c</PathWithFileName>
+      <PathWithFileName>..\TASK\communication_task.c</PathWithFileName>
       <FilenameWithoutPath>communication_task.c</FilenameWithoutPath>
       <RteFlg>0</RteFlg>
       <bShared>0</bShared>

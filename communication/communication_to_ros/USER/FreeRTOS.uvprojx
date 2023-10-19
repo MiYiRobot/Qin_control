@@ -726,12 +726,12 @@
             <File>
               <FileName>move_task.c</FileName>
               <FileType>1</FileType>
-              <FilePath>.\move_task.c</FilePath>
+              <FilePath>..\TASK\move_task.c</FilePath>
             </File>
             <File>
               <FileName>communication_task.c</FileName>
               <FileType>1</FileType>
-              <FilePath>.\communication_task.c</FilePath>
+              <FilePath>..\TASK\communication_task.c</FilePath>
             </File>
           </Files>
         </Group>
