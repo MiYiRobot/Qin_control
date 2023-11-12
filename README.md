@@ -2,3 +2,4 @@
 这是2024rc控制组Qin的一些控制代码
 action_demo是读取action传感器的最简代码
 communication_to_ros是初步实现上下位机通讯的初步代码
+r2是r2整车实现基本逻辑的控制代码
