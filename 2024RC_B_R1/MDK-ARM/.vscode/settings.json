@@ -1,0 +1,11 @@
+{
+    "files.associations": {
+        "stm32f4xx_hal.h": "c",
+        "usr_can.h": "c",
+        "iosfwd": "c",
+        "main.h": "c",
+        "upper.h": "c",
+        "rm_motor.h": "c"
+    },
+    "C_Cpp.errorSquiggles": "enabled"
+}
